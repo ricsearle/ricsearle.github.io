@@ -4,41 +4,56 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Bootstrap demo</title>
+  <title>Solent Marks</title>
   <link href="css/bootstrap.min.css" rel="stylesheet">
 </head>
 
 <body>
   <div class="container">
-    <h2>Ahoy Buoy!</h2>
-    <p>73 4L 4C 4L 4B 4L 72</p>
+    <h2>Solent Marks</h2>
 
-    <form id="inputForm" class="form-inline" onsubmit="return handleSubmit(event)">
-      <input type="text" id="inputBox" placeholder="Enter buoy sequence" required>
-      <input type="number" id="windDirection"  placeholder="Wind direction (°)" min="0" max="359" required
-        value="210">
-      <input type="number" id="boatSpeed" placeholder="Boat Speed (knots)" min="1" max="20" required
-        value="4">
-      <button type="submit">Submit</button>
-    </form>
-
-
-    <table class="table" id="outputTable" style="display: none;">
-      <thead>
-      <tr>
-        <th>Leg</th>
-        <th>Mark Name</th>
-        <th>Distance</th>
-        <th>Bearing</th>
-        <th>Wind Angle</th>
-        <th>Time to Mark</th>
-      </tr>
-      </thead>
-      <tbody>
-      <!-- Output rows go here -->
-      </tbody>
-    </table>
-  
+    <div class="mb-4">
+      <form class="row g-3" id="inputForm" onsubmit="return handleSubmit(event)">
+        <div class="mb-3">
+          <label for="buoyList" class="form-label fw-light">Marks of the course. (e.g. 73 4L 4C 4L 4B 4L 72)</label>
+          <input type="text" class="form-control" id="buoyList">
+        </div>
+        <div class="row">
+          <div class="col-auto">
+            <label for="windDirection" class="form-label fw-light">Wind Direction</label>
+            <input type="number" class="form-control" id="windDirection" placeholder="Wind direction (°)" min="0"
+              max="359" required value="210">
+          </div>
+          <div class="col-auto">
+            <label for="boatSpeed" class="form-label fw-light">VMG</label>
+            <input type="number" class="form-control" id="boatSpeed" placeholder="Boat Speed (knots)" min="1" max="20"
+              required value="4">
+          </div>
+        </div>
+        <div class="row mt-3">
+          <div class="col-auto">
+            <button class="btn btn-primary" type="submit">Submit</button>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div>
+      <table class="table table-striped table-hover" id="outputTable" style="display: none;">
+        <thead>
+          <tr>
+            <th>Leg</th>
+            <th>Mark Name</th>
+            <th>Distance</th>
+            <th>Bearing</th>
+            <th>Wind Angle</th>
+            <th>Time to Mark</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Output rows go here -->
+        </tbody>
+      </table>
+    </div>
 
   </div>
 
@@ -51,7 +66,7 @@
       event.preventDefault();
       const boatSpeed = parseFloat(document.getElementById('boatSpeed').value.trim());
       const windDir = document.getElementById('windDirection').value.trim();
-      const input = document.getElementById('inputBox').value.trim();
+      const input = document.getElementById('buoyList').value.trim();
       const names = input.toUpperCase().split(/\s+/);
 
       const buoyMap = {};
