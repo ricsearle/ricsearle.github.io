@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bootstrap demo</title>
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+  <div class="container">
+    <h2>Ahoy Buoy!</h2>
+    <p>73 4L 4C 4L 4B 4L 72</p>
+
+    <form id="inputForm" class="form-inline" onsubmit="return handleSubmit(event)">
+      <input type="text" id="inputBox" placeholder="Enter buoy sequence" required>
+      <input type="number" id="windDirection"  placeholder="Wind direction (°)" min="0" max="359" required
+        value="210">
+      <input type="number" id="boatSpeed" placeholder="Boat Speed (knots)" min="1" max="20" required
+        value="4">
+      <button type="submit">Submit</button>
+    </form>
+
+
+    <table class="table" id="outputTable" style="display: none;">
+      <thead>
+      <tr>
+        <th>Leg</th>
+        <th>Mark Name</th>
+        <th>Distance</th>
+        <th>Bearing</th>
+        <th>Wind Angle</th>
+        <th>Time to Mark</th>
+      </tr>
+      </thead>
+      <tbody>
+      <!-- Output rows go here -->
+      </tbody>
+    </table>
+  
+
+  </div>
+
+  <script src="js/bootstrap.bundle.min.js"></script>
+  <script src="buoys.js"></script>
+
+  <script>
+
+    function handleSubmit(event) {
+      event.preventDefault();
+      const boatSpeed = parseFloat(document.getElementById('boatSpeed').value.trim());
+      const windDir = document.getElementById('windDirection').value.trim();
+      const input = document.getElementById('inputBox').value.trim();
+      const names = input.toUpperCase().split(/\s+/);
+
+      const buoyMap = {};
+      buoys.forEach(b => buoyMap[b.name] = b);
+
+      const tbody = document.getElementById('outputTable').querySelector('tbody');
+      tbody.innerHTML = ''; // Clear previous rows
+
+      for (let i = 0; i < names.length - 1; i++) {
+        const from = buoyMap[names[i]];
+        const to = buoyMap[names[i + 1]];
+        if (from && to) {
+          // Convert distance from km to nautical miles (1 nm = 1.852 km)
+          const distanceKm = haversine(from.latitude, from.longitude, to.latitude, to.longitude);
+          const distanceNm = (distanceKm / 1.852).toFixed(1);
+          const bearing = calculateBearing(from.latitude, from.longitude, to.latitude, to.longitude).toFixed(0);
+          const windAngle = smallestSignedAngle(bearing, windDir);
+          const timeToMarkInMinutes = (distanceNm / boatSpeed * 60).toFixed(1);
+          const row = document.createElement('tr');
+          row.innerHTML = `<td>${from.name} → ${to.name}</td><td>${to.desc} (${to.sym})</td><td>${distanceNm} nm</td><td>${bearing}°</td><td>${windAngle}°</td><td>${timeToMarkInMinutes} mins</td>`;
+          tbody.appendChild(row);
+        }
+      }
+      document.getElementById('outputTable').style.display = '';
+      return false;
+    }
+
+    // Haversine formula to calculate distance (in km)
+    function haversine(lat1, lon1, lat2, lon2) {
+      const toRad = deg => deg * Math.PI / 180;
+      const R = 6371; // Earth radius in km
+      const dLat = toRad(lat2 - lat1);
+      const dLon = toRad(lon2 - lon1);
+      const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    }
+
+    // Calculate initial bearing from point 1 to point 2
+    function calculateBearing(lat1, lon1, lat2, lon2) {
+      const toRad = deg => deg * Math.PI / 180;
+      const toDeg = rad => rad * 180 / Math.PI;
+      const dLon = toRad(lon2 - lon1);
+      const y = Math.sin(dLon) * Math.cos(toRad(lat2));
+      const x = Math.cos(toRad(lat1)) * Math.sin(toRad(lat2)) -
+        Math.sin(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.cos(dLon);
+      let brng = Math.atan2(y, x);
+      brng = toDeg(brng);
+      return (brng + 360) % 360;
+    }
+
+    function smallestSignedAngle(from, to) {
+      // Bearings in degrees, 0-360
+      let diff = ((to - from + 540) % 360) - 180;
+      return diff;
+    }
+
+  </script>
+
+</body>
+
+</html>
