@@ -122,6 +122,11 @@
 
       for (let i = 0; i < names.length - 1; i++) {
         const from = buoyMap[names[i]];
+
+        if (i==0) {
+          mapCoords.push([from.longitude, from.latitude]);
+        }
+
         const to = buoyMap[names[i + 1]];
         if (from && to) {
           // Convert distance from km to nautical miles (1 nm = 1.852 km)
